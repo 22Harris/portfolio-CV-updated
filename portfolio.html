@@ -1,0 +1,2057 @@
+<!doctype html>
+<html lang="fr" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harris Martial — Développeur Fullstack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ─── Reset ─── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+        scrollbar-width: thin;
+      }
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        border-radius: 9999px;
+      }
+
+      /* ─── Design tokens ─── */
+      :root {
+        --font-display: "Syne", sans-serif;
+        --font-body: "Space Grotesk", sans-serif;
+        --font-mono: "Fira Code", monospace;
+
+        /* Blue gradient accent */
+        --grad-from: #3b82f6;
+        --grad-to: #0ea5e9;
+        --grad: linear-gradient(135deg, var(--grad-from), var(--grad-to));
+
+        /* Dark theme */
+        --bg: #09090b;
+        --bg-alt: #111113;
+        --bg-card: #131316;
+        --border: rgba(255, 255, 255, 0.07);
+        --border-hover: rgba(59, 130, 246, 0.4);
+        --text-hi: #fafafa;
+        --text-body: #a1a1aa;
+        --text-muted: #52525b;
+        --text-accent: #60a5fa;
+        --dot-color: rgba(255, 255, 255, 0.035);
+        --glow: rgba(59, 130, 246, 0.15);
+        --scrollbar: #27272a;
+      }
+
+      html.light {
+        --bg: #fafafa;
+        --bg-alt: #f4f4f5;
+        --bg-card: #ffffff;
+        --border: rgba(0, 0, 0, 0.07);
+        --border-hover: rgba(59, 130, 246, 0.5);
+        --text-hi: #09090b;
+        --text-body: #52525b;
+        --text-muted: #a1a1aa;
+        --text-accent: #2563eb;
+        --dot-color: rgba(0, 0, 0, 0.04);
+        --glow: rgba(59, 130, 246, 0.08);
+        --scrollbar: #d4d4d8;
+      }
+
+      html.dark ::-webkit-scrollbar-thumb,
+      html.light ::-webkit-scrollbar-thumb {
+        background: var(--scrollbar);
+      }
+      html.dark,
+      html.light {
+        scrollbar-color: var(--scrollbar) transparent;
+      }
+
+      /* ─── Body ─── */
+      body {
+        font-family: var(--font-body);
+        background: var(--bg);
+        color: var(--text-body);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      /* Dot grid background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: radial-gradient(
+          var(--dot-color) 1px,
+          transparent 1px
+        );
+        background-size: 28px 28px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      ::selection {
+        background: rgba(59, 130, 246, 0.25);
+        color: var(--text-hi);
+      }
+
+      /* ─── Scroll progress ─── */
+      #scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 2px;
+        width: 0%;
+        background: var(--grad);
+        z-index: 200;
+        transition: width 0.08s linear;
+      }
+
+      /* ─── Spotlight ─── */
+      #spotlight {
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        transition: background 0.4s;
+      }
+
+      /* ─── Layout ─── */
+      .page {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      @media (min-width: 1024px) {
+        .page {
+          flex-direction: row;
+          align-items: flex-start;
+        }
+      }
+
+      /* ─── Left panel ─── */
+      .left {
+        padding: 56px 24px 48px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 48px;
+      }
+
+      @media (min-width: 640px) {
+        .left {
+          padding: 64px 48px;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .left {
+          position: sticky;
+          top: 0;
+          width: 46%;
+          min-height: 100vh;
+          max-height: 100vh;
+          overflow: hidden;
+          padding: 80px 56px 80px 72px;
+          gap: 0;
+        }
+      }
+
+      /* ─── Right panel ─── */
+      .right {
+        padding: 0 24px 120px;
+      }
+
+      @media (min-width: 640px) {
+        .right {
+          padding: 0 48px 120px;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .right {
+          width: 54%;
+          padding: 80px 72px 120px 40px;
+        }
+      }
+
+      /* ─── Gradient text utility ─── */
+      .grad-text {
+        background: var(--grad);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* ─── Hero ─── */
+      .hero-label {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--text-accent);
+        letter-spacing: 0.08em;
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: fadeIn 0.6s ease-out 80ms forwards;
+      }
+
+      .hero-name {
+        font-family: var(--font-display);
+        font-size: 2.6rem;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        color: var(--text-hi);
+        margin-bottom: 10px;
+        opacity: 0;
+        animation: slideUp 0.7s ease-out 180ms forwards;
+      }
+
+      @media (min-width: 640px) {
+        .hero-name {
+          font-size: 3.2rem;
+        }
+      }
+
+      .hero-title {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+        opacity: 0;
+        animation: slideUp 0.7s ease-out 280ms forwards;
+      }
+
+      @media (min-width: 640px) {
+        .hero-title {
+          font-size: 1.6rem;
+        }
+      }
+
+      .hero-desc {
+        font-size: 0.92rem;
+        color: var(--text-body);
+        line-height: 1.75;
+        max-width: 360px;
+        opacity: 0;
+        animation: slideUp 0.7s ease-out 360ms forwards;
+      }
+
+      /* ─── Nav (desktop) ─── */
+      .desktop-nav {
+        display: none;
+        margin-top: 52px;
+      }
+
+      @media (min-width: 1024px) {
+        .desktop-nav {
+          display: block;
+        }
+      }
+
+      .desktop-nav ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .nav-item a {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background 0.2s;
+        cursor: pointer;
+      }
+
+      .nav-item a:hover {
+        background: rgba(59, 130, 246, 0.07);
+      }
+
+      .nav-item a.active {
+        background: rgba(59, 130, 246, 0.1);
+      }
+
+      .nav-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        border: 1.5px solid var(--text-muted);
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+
+      .nav-item a:hover .nav-dot,
+      .nav-item a.active .nav-dot {
+        background: var(--grad-from);
+        border-color: var(--grad-from);
+        box-shadow: 0 0 8px var(--grad-from);
+      }
+
+      .nav-label-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        transition: color 0.2s;
+      }
+
+      .nav-item a:hover .nav-label-text,
+      .nav-item a.active .nav-label-text {
+        color: var(--text-hi);
+      }
+
+      /* Mobile nav */
+      .mobile-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 32px;
+      }
+
+      @media (min-width: 1024px) {
+        .mobile-nav {
+          display: none;
+        }
+      }
+
+      .mobile-nav a {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        transition: all 0.15s;
+      }
+
+      .mobile-nav a:hover {
+        color: var(--text-hi);
+        border-color: var(--border-hover);
+        background: rgba(59, 130, 246, 0.07);
+      }
+
+      /* ─── Left footer ─── */
+      .left-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      @media (min-width: 1024px) {
+        .left-footer {
+          margin-top: 0;
+        }
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .icon-btn {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 9px;
+        cursor: pointer;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+
+      .icon-btn:hover {
+        color: var(--text-hi);
+        border-color: var(--border-hover);
+        background: rgba(59, 130, 246, 0.07);
+      }
+
+      .icon-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .social-row {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      @media (min-width: 1024px) {
+        .social-row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
+      .social-row li a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+
+      .social-row li a:hover {
+        color: var(--text-hi);
+        background: rgba(59, 130, 246, 0.07);
+      }
+
+      .social-row li a svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+      }
+
+      /* ─── Section ─── */
+      section {
+        margin-bottom: 100px;
+        scroll-margin-top: 80px;
+      }
+
+      .sec-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 36px;
+      }
+
+      @media (min-width: 1024px) {
+        .sec-header {
+          display: none;
+        }
+      }
+
+      .sec-num {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text-accent);
+        letter-spacing: 0.06em;
+        padding: 3px 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        background: rgba(59, 130, 246, 0.07);
+      }
+
+      .sec-title-text {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-hi);
+      }
+
+      .sec-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      /* ─── About layout ─── */
+      .about-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+
+      .about-top {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+
+      @media (min-width: 560px) {
+        .about-top {
+          flex-direction: row;
+          align-items: flex-start;
+          gap: 36px;
+        }
+        .avatar-wrap {
+          flex-shrink: 0;
+        }
+        .about-right {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+      }
+
+      .about-p {
+        font-size: 0.9rem;
+        color: var(--text-body);
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
+
+      .about-p strong {
+        color: var(--text-hi);
+        font-weight: 600;
+      }
+
+      .tech-grid {
+        list-style: none;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 20px;
+        margin-top: 20px;
+      }
+
+      .tech-grid li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        color: var(--text-body);
+      }
+
+      .tech-grid li::before {
+        content: "▸";
+        color: var(--text-accent);
+        font-size: 0.65rem;
+      }
+
+      /* ─── Avatar ─── */
+      .avatar-wrap {
+        position: relative;
+        display: inline-block;
+      }
+
+      /* gradient border using pseudo */
+      .avatar-wrap::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: 14px;
+        background: var(--grad);
+        z-index: 0;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+      }
+
+      .avatar-wrap:hover::before {
+        opacity: 1;
+      }
+
+      .avatar-wrap::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        background: var(--bg-card);
+        z-index: 0;
+      }
+
+      .avatar-img {
+        position: relative;
+        z-index: 1;
+        width: 220px;
+        height: 270px;
+        border-radius: 12px;
+        object-fit: cover;
+        object-position: center top;
+        display: block;
+        filter: grayscale(10%);
+        transition: filter 0.3s;
+      }
+
+      @media (max-width: 559px) {
+        .avatar-img {
+          width: 100%;
+          max-width: 280px;
+          height: 320px;
+          margin: 0 auto;
+        }
+      }
+
+      .avatar-wrap:hover .avatar-img {
+        filter: grayscale(0%);
+      }
+
+      /* ─── Experience / Project card ─── */
+      .card {
+        position: relative;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 22px 24px;
+        margin-bottom: 12px;
+        background: var(--bg-card);
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          transform 0.2s;
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--grad);
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 0;
+        border-radius: inherit;
+      }
+
+      .card:hover {
+        border-color: var(--border-hover);
+        box-shadow:
+          0 0 0 1px rgba(59, 130, 246, 0.15),
+          0 8px 32px rgba(59, 130, 246, 0.08);
+        transform: translateY(-1px);
+      }
+
+      .card > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .card-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      @media (min-width: 580px) {
+        .card-meta {
+          flex-direction: row;
+          gap: 20px;
+        }
+        .card-period {
+          width: 100px;
+          flex-shrink: 0;
+        }
+      }
+
+      .card-period {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        line-height: 1.5;
+        padding-top: 3px;
+      }
+
+      .card-body {
+        flex: 1;
+      }
+
+      .card-role {
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--text-hi);
+        line-height: 1.4;
+        margin-bottom: 2px;
+        transition: color 0.15s;
+      }
+
+      .card:hover .card-role {
+        color: var(--grad-from);
+      }
+
+      .card-company {
+        font-size: 0.85rem;
+        font-weight: 500;
+        background: var(--grad);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .card-location {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        margin-top: 4px;
+        margin-bottom: 14px;
+      }
+
+      .card-bullets {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        margin-bottom: 16px;
+      }
+
+      .card-bullets li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--text-body);
+        line-height: 1.65;
+      }
+
+      .card-bullets li::before {
+        content: "▸";
+        color: var(--text-accent);
+        font-size: 0.6rem;
+        margin-top: 5px;
+        flex-shrink: 0;
+      }
+
+      /* Project specific */
+      .card-context {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+
+      .card-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-hi);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: color 0.15s;
+      }
+
+      .card:hover .card-title {
+        color: var(--grad-from);
+      }
+
+      .card-featured-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--grad-from);
+        box-shadow: 0 0 6px var(--grad-from);
+        flex-shrink: 0;
+      }
+
+      .card-desc {
+        font-size: 0.85rem;
+        color: var(--text-body);
+        line-height: 1.7;
+        margin-bottom: 16px;
+      }
+
+      /* ─── Tags ─── */
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .tag {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 500;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--grad-from);
+        border: 1px solid rgba(59, 130, 246, 0.18);
+        transition: all 0.2s;
+      }
+
+      .card:hover .tag {
+        background: rgba(59, 130, 246, 0.14);
+        border-color: rgba(59, 130, 246, 0.35);
+      }
+
+      /* ─── Skills bento ─── */
+      .bento {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      @media (min-width: 540px) {
+        .bento {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .bento-wide {
+        grid-column: 1 / -1;
+      }
+
+      @media (min-width: 900px) {
+        .bento-wide {
+          grid-column: span 1;
+        }
+      }
+
+      .bento-card {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 22px;
+        background: var(--bg-card);
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          transform 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* gradient top-border accent */
+      .bento-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--grad);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .bento-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 4px 24px rgba(59, 130, 246, 0.08);
+        transform: translateY(-2px);
+      }
+
+      .bento-card:hover::before {
+        opacity: 1;
+      }
+
+      .bento-heading {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-hi);
+        margin-bottom: 14px;
+        letter-spacing: 0.01em;
+      }
+
+      .skill-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .skill-pill {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        color: var(--text-body);
+        background: var(--bg-alt);
+        transition: all 0.2s;
+      }
+
+      .bento-card:hover .skill-pill {
+        border-color: rgba(59, 130, 246, 0.25);
+        color: var(--text-hi);
+        background: rgba(59, 130, 246, 0.06);
+      }
+
+      /* ─── Contact ─── */
+      .contact-wrap {
+        text-align: center;
+        max-width: 460px;
+        margin: 0 auto;
+      }
+
+      .contact-overline {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-accent);
+        letter-spacing: 0.08em;
+        margin-bottom: 16px;
+      }
+
+      .contact-heading {
+        font-family: var(--font-display);
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--text-hi);
+        margin-bottom: 16px;
+        letter-spacing: -0.02em;
+      }
+
+      @media (min-width: 640px) {
+        .contact-heading {
+          font-size: 2.8rem;
+        }
+      }
+
+      .contact-body {
+        font-size: 0.9rem;
+        color: var(--text-body);
+        line-height: 1.75;
+        margin-bottom: 36px;
+      }
+
+      .contact-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 32px;
+        border-radius: 10px;
+        background: var(--grad);
+        color: #fff;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+          opacity 0.15s,
+          transform 0.15s,
+          box-shadow 0.15s;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+      }
+
+      .contact-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+      }
+
+      .footer-credit {
+        text-align: center;
+        margin-top: 80px;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        color: var(--text-muted);
+      }
+
+      /* ─── Animations ─── */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(16px);
+        transition:
+          opacity 0.55s ease-out,
+          transform 0.55s ease-out;
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ══════════════════════════════════════
+         RESPONSIVE
+      ══════════════════════════════════════ */
+
+      /* ── Tablet & mobile : social icons only ── */
+      @media (max-width: 1023px) {
+        .social-label {
+          display: none;
+        }
+        .social-row {
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+        .social-row li a {
+          padding: 9px;
+          white-space: normal;
+        }
+      }
+
+      /* ── Mobile : right panel needs breathing room below header ── */
+      @media (max-width: 1023px) {
+        .right {
+          padding-top: 8px;
+        }
+        section {
+          margin-bottom: 72px;
+        }
+      }
+
+      /* ── Mobile : about avatar centered ── */
+      @media (max-width: 559px) {
+        .about-top {
+          align-items: center;
+        }
+        .avatar-wrap {
+          display: block;
+          margin: 0 auto;
+        }
+        .avatar-img {
+          width: 180px;
+          height: 220px;
+        }
+      }
+
+      /* ── Mobile (< 640px) : general sizing ── */
+      @media (max-width: 639px) {
+        .left {
+          padding: 40px 20px 36px;
+          gap: 36px;
+        }
+        .right {
+          padding-left: 20px;
+          padding-right: 20px;
+          padding-bottom: 80px;
+        }
+        .hero-name {
+          font-size: 2.2rem;
+        }
+        .hero-title {
+          font-size: 1.2rem;
+        }
+        .hero-desc {
+          max-width: 100%;
+        }
+        .card {
+          padding: 16px 18px;
+        }
+        .bento-card {
+          padding: 18px;
+        }
+        .contact-heading {
+          font-size: 1.8rem;
+        }
+        .contact-wrap {
+          padding: 0 4px;
+        }
+        .about-p {
+          font-size: 0.88rem;
+        }
+        .card-bullets li {
+          font-size: 0.82rem;
+        }
+        .card-role {
+          font-size: 0.88rem;
+        }
+      }
+
+      /* ── Very small phones (< 380px) ── */
+      @media (max-width: 379px) {
+        .left {
+          padding: 32px 16px 28px;
+        }
+        .right {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+        .hero-name {
+          font-size: 1.9rem;
+        }
+        .hero-label {
+          font-size: 0.72rem;
+        }
+        .mobile-nav {
+          gap: 6px;
+        }
+        .mobile-nav a {
+          font-size: 0.68rem;
+          padding: 5px 10px;
+        }
+        .contact-heading {
+          font-size: 1.6rem;
+        }
+      }
+
+      /* ── Tablet portrait (640–1023px) ── */
+      @media (min-width: 640px) and (max-width: 1023px) {
+        .left {
+          padding: 56px 48px 48px;
+        }
+        .right {
+          padding: 24px 48px 96px;
+        }
+        .hero-name {
+          font-size: 2.8rem;
+        }
+        .bento {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .bento-wide {
+          grid-column: 1 / -1;
+        }
+        .avatar-img {
+          width: 200px;
+          height: 240px;
+        }
+      }
+
+      /* ── Lang button ─── */
+      .lang-btn {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 11px;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        transition: all 0.15s;
+        line-height: 1;
+      }
+      .lang-btn:hover {
+        color: var(--text-hi);
+        border-color: var(--border-hover);
+        background: rgba(59, 130, 246, 0.07);
+      }
+
+      /* ─── Focus ─── */
+      :focus-visible {
+        outline: 2px solid var(--grad-from);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="scroll-progress"></div>
+    <div id="spotlight"></div>
+
+    <div class="page">
+      <!-- ════ LEFT PANEL ════ -->
+      <header class="left">
+        <div>
+          <p class="hero-label" data-i18n="hero.label">
+            // fullstack developer
+          </p>
+
+          <h1 class="hero-name">
+            Harris<br />
+            <span class="grad-text">Martial.</span>
+          </h1>
+
+          <h2 class="hero-title" data-i18n="hero.title">
+            Angular &amp; NestJS
+          </h2>
+
+          <p
+            class="hero-desc"
+            data-i18n="hero.desc"
+            style="opacity: 0; animation: slideUp 0.7s ease-out 440ms forwards"
+          >
+            Je conçois des applications web et mobiles robustes, du frontend
+            Angular au backend NestJS, jusqu'au déploiement en production.
+          </p>
+
+          <!-- Desktop nav -->
+          <nav class="desktop-nav" aria-label="Navigation">
+            <ul>
+              <li class="nav-item">
+                <a href="#about" data-sec="about">
+                  <span class="nav-dot"></span
+                  ><span class="nav-label-text" data-i18n="nav.about"
+                    >À propos</span
+                  ></a
+                >
+              </li>
+              <li class="nav-item">
+                <a href="#experience" data-sec="experience">
+                  <span class="nav-dot"></span
+                  ><span class="nav-label-text" data-i18n="nav.experience"
+                    >Expériences</span
+                  ></a
+                >
+              </li>
+              <li class="nav-item">
+                <a href="#projects" data-sec="projects">
+                  <span class="nav-dot"></span
+                  ><span class="nav-label-text" data-i18n="nav.projects"
+                    >Projets</span
+                  ></a
+                >
+              </li>
+              <li class="nav-item">
+                <a href="#skills" data-sec="skills">
+                  <span class="nav-dot"></span
+                  ><span class="nav-label-text" data-i18n="nav.skills"
+                    >Compétences</span
+                  ></a
+                >
+              </li>
+              <li class="nav-item">
+                <a href="#contact" data-sec="contact">
+                  <span class="nav-dot"></span
+                  ><span class="nav-label-text" data-i18n="nav.contact"
+                    >Contact</span
+                  ></a
+                >
+              </li>
+            </ul>
+          </nav>
+
+          <!-- Mobile nav -->
+          <nav class="mobile-nav" aria-label="Navigation mobile">
+            <a href="#about" data-i18n="nav.about">À propos</a>
+            <a href="#experience" data-i18n="nav.experience">Expériences</a>
+            <a href="#projects" data-i18n="nav.projects">Projets</a>
+            <a href="#skills" data-i18n="nav.skills">Compétences</a>
+            <a href="#contact" data-i18n="nav.contact">Contact</a>
+          </nav>
+        </div>
+
+        <!-- Bottom controls + socials -->
+        <div class="left-footer">
+          <div class="controls">
+            <button class="lang-btn" id="lang-btn" aria-label="Switch language">
+              EN
+            </button>
+            <button
+              class="icon-btn"
+              id="theme-btn"
+              aria-label="Basculer le thème"
+            >
+              <svg
+                id="icon-moon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+              <svg
+                id="icon-sun"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="display: none"
+              >
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            </button>
+            <button
+              class="icon-btn"
+              id="pdf-btn"
+              aria-label="Télécharger le CV en PDF"
+              title="Télécharger CV (PDF)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            </button>
+          </div>
+
+          <ul class="social-row">
+            <li>
+              <a
+                href="https://github.com/22Harris"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                  />
+                </svg>
+                <span class="social-label">github.com/22Harris</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.linkedin.com/in/harris-martial-randrianantenaina-abb2b4339"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  />
+                </svg>
+                <span class="social-label">LinkedIn</span>
+              </a>
+            </li>
+            <li>
+              <a href="mailto:harrisrandrianantenaina@gmail.com">
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                <span class="social-label"
+                  >harrisrandrianantenaina@gmail.com</span
+                >
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://wa.me/261341673813"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+                  />
+                </svg>
+                <span class="social-label">+261 34 16 738 13</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </header>
+
+      <!-- ════ RIGHT PANEL ════ -->
+      <main class="right">
+        <!-- ── À propos ── -->
+        <section id="about">
+          <div class="sec-header">
+            <span class="sec-num">01</span>
+            <span class="sec-title-text" data-i18n="nav.about">À propos</span>
+            <span class="sec-line"></span>
+          </div>
+
+          <div class="about-layout reveal">
+            <div class="about-top">
+              <div class="avatar-wrap">
+                <picture>
+                  <source srcset="media.webp" type="image/webp" />
+                  <img
+                    class="avatar-img"
+                    src="Media.png"
+                    alt="Harris Martial Randrianantenaina"
+                  />
+                </picture>
+              </div>
+
+              <div class="about-right">
+                <p class="about-p" data-i18n-html="about.p1">
+                  Développeur fullstack spécialisé en
+                  <strong>Angular</strong> et <strong>NestJS</strong>,
+                  j'interviens sur l'ensemble du cycle de développement&nbsp;:
+                  analyse, conception, développement, déploiement et formation.
+                </p>
+                <p class="about-p" data-i18n-html="about.p2">
+                  J'ai livré en production un
+                  <strong>système de gestion hospitalière</strong> déployé au
+                  CHUSSPA, et je contribue actuellement au développement de
+                  <strong>Qolee</strong> — une application de gestion de bagages
+                  pour <strong>Air France</strong> (Angular, Ionic, NestJS,
+                  MongoDB Atlas).
+                </p>
+                <p class="about-p" data-i18n="about.p3">
+                  Je privilégie un code maintenable, une architecture propre et
+                  une UX soignée.
+                </p>
+                <ul class="tech-grid">
+                  <li>Angular &amp; Ionic</li>
+                  <li>NestJS / Node.js</li>
+                  <li>TypeScript</li>
+                  <li>MongoDB / PostgreSQL</li>
+                  <li>Docker Compose</li>
+                  <li>API REST &amp; JWT</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Expérience ── -->
+        <section id="experience">
+          <div class="sec-header">
+            <span class="sec-num">02</span>
+            <span class="sec-title-text" data-i18n="nav.experience"
+              >Expériences</span
+            >
+            <span class="sec-line"></span>
+          </div>
+
+          <!-- ORCHIS CDI -->
+          <div class="card reveal">
+            <div class="card-meta">
+              <p class="card-period" data-i18n-html="exp1.period">
+                Août 2025<br />Présent
+              </p>
+              <div class="card-body">
+                <p class="card-role" data-i18n="exp1.role">
+                  Développeur Fullstack
+                </p>
+                <p class="card-company">ORCHIS MG</p>
+                <p class="card-location" data-i18n="exp1.location">
+                  Nanisana, Antananarivo — CDI
+                </p>
+                <ul class="card-bullets">
+                  <li data-i18n="exp1.b1">
+                    Conception et développement de fonctionnalités métier dans
+                    un environnement Angular/NestJS en production.
+                  </li>
+                  <li data-i18n="exp1.b2">
+                    Participation active aux sprints Agile (Scrum) :
+                    estimations, revues de code, rétrospectives.
+                  </li>
+                  <li data-i18n="exp1.b3">
+                    Standardisation des environnements via Docker Compose pour
+                    toute l'équipe.
+                  </li>
+                  <li data-i18n-html="exp1.b4">
+                    Développement de
+                    <strong style="color: var(--text-hi)">Qolee</strong>,
+                    application web et mobile de gestion de bagages pour Air
+                    France (Angular, NestJS, Ionic, MongoDB Atlas).
+                  </li>
+                </ul>
+                <div class="tags">
+                  <span class="tag">Angular</span
+                  ><span class="tag">NestJS</span> <span class="tag">Ionic</span
+                  ><span class="tag">MongoDB</span>
+                  <span class="tag">Docker</span><span class="tag">Scrum</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage HMS -->
+          <div class="card reveal">
+            <div class="card-meta">
+              <p class="card-period" data-i18n-html="exp2.period">
+                Jan 2025<br />Août 2025
+              </p>
+              <div class="card-body">
+                <p class="card-role" data-i18n="exp2.role">
+                  Stage — Développeur Fullstack
+                </p>
+                <p class="card-company">ORCHIS MG / ITRAS Group</p>
+                <p class="card-location">Nanisana, Antananarivo</p>
+                <ul class="card-bullets">
+                  <li data-i18n="exp2.b1">
+                    Développement intégral du HMS déployé en production au
+                    CHUSSPA.
+                  </li>
+                  <li data-i18n="exp2.b2">
+                    Architecture modulaire backend NestJS avec API Gateway.
+                  </li>
+                  <li data-i18n="exp2.b3">
+                    7+ modules Angular couvrant l'ensemble des services du
+                    CHUSSPA.
+                  </li>
+                  <li data-i18n="exp2.b4">
+                    Sécurisation des flux avec JWT et gestion des rôles.
+                  </li>
+                  <li data-i18n="exp2.b5">
+                    Documentation technique et formation des utilisateurs
+                    finaux.
+                  </li>
+                </ul>
+                <div class="tags">
+                  <span class="tag">Angular</span
+                  ><span class="tag">NestJS</span>
+                  <span class="tag">MongoDB</span><span class="tag">JWT</span>
+                  <span class="tag">API Gateway</span
+                  ><span class="tag">TypeScript</span>
+                  <span class="tag">SCSS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ministère -->
+          <div class="card reveal">
+            <div class="card-meta">
+              <p class="card-period" data-i18n-html="exp3.period">
+                Avr 2024<br />Juil 2024
+              </p>
+              <div class="card-body">
+                <p class="card-role" data-i18n="exp3.role">
+                  Stage — Développeur Web &amp; Mobile
+                </p>
+                <p class="card-company" data-i18n="exp3.company">
+                  Ministère de l'Énergie
+                </p>
+                <p class="card-location">Ampandrianomby, Antananarivo</p>
+                <ul class="card-bullets">
+                  <li data-i18n="exp3.b1">
+                    Solution multi-plateforme de gestion du parc informatique
+                    ministériel.
+                  </li>
+                  <li data-i18n="exp3.b2">
+                    Interface web Laravel pour l'administration globale du parc.
+                  </li>
+                  <li data-i18n="exp3.b3">
+                    Application mobile React Native pour la consultation et le
+                    signalement d'incidents.
+                  </li>
+                  <li data-i18n="exp3.b4">
+                    Communication en temps réel entre interfaces web et mobile.
+                  </li>
+                </ul>
+                <div class="tags">
+                  <span class="tag">Laravel</span><span class="tag">PHP</span>
+                  <span class="tag">MySQL</span
+                  ><span class="tag">React Native</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Projets ── -->
+        <section id="projects">
+          <div class="sec-header">
+            <span class="sec-num">03</span>
+            <span class="sec-title-text" data-i18n="nav.projects">Projets</span>
+            <span class="sec-line"></span>
+          </div>
+
+          <div class="card reveal">
+            <p class="card-context" data-i18n="proj1.context">
+              Système d'information · Production · CHUSSPA
+            </p>
+            <h3 class="card-title">
+              HMS — Gestion Hospitalière <span class="card-featured-dot"></span>
+            </h3>
+            <p class="card-desc" data-i18n="proj1.desc">
+              Application complète déployée en production au CHUSSPA. Couvre
+              guichet, caisse, médecins, laboratoire, pharmacie et
+              administration. Architecture modulaire NestJS avec API Gateway,
+              authentification JWT et modules Angular indépendants par service.
+            </p>
+            <div class="tags">
+              <span class="tag">Angular</span><span class="tag">NestJS</span>
+              <span class="tag">MongoDB</span
+              ><span class="tag">API Gateway</span>
+              <span class="tag">JWT</span>
+            </div>
+          </div>
+
+          <div class="card reveal">
+            <p class="card-context">Web &amp; Mobile · Air France · Warning</p>
+            <h3 class="card-title">
+              Qolee — <span data-i18n="proj2.title">Gestion de Bagages</span>
+              <span class="card-featured-dot"></span>
+            </h3>
+            <p class="card-desc" data-i18n="proj2.desc">
+              Application de gestion de bagages pour Air France et Warning
+              développée chez ORCHIS MG. Interface web Angular et mobile Ionic,
+              backend NestJS avec MongoDB Atlas cloud.
+            </p>
+            <div class="tags">
+              <span class="tag">Angular</span><span class="tag">Ionic</span>
+              <span class="tag">NestJS</span
+              ><span class="tag">MongoDB Atlas</span>
+              <span class="tag">TypeScript</span>
+            </div>
+          </div>
+
+          <div class="card reveal">
+            <p class="card-context" data-i18n="proj3.context">
+              Multi-plateforme · Ministère de l'Énergie
+            </p>
+            <h3 class="card-title" data-i18n="proj3.title">
+              Gestion du Parc Informatique
+            </h3>
+            <p class="card-desc" data-i18n="proj3.desc">
+              Solution complète de suivi du parc informatique du Ministère de
+              l'Énergie. Interface Laravel pour les administrateurs et
+              application React Native pour les agents terrain avec remontée
+              d'incidents en temps réel.
+            </p>
+            <div class="tags">
+              <span class="tag">Laravel</span
+              ><span class="tag">React Native</span>
+              <span class="tag">MySQL</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Compétences ── -->
+        <section id="skills">
+          <div class="sec-header">
+            <span class="sec-num">04</span>
+            <span class="sec-title-text" data-i18n="nav.skills"
+              >Compétences</span
+            >
+            <span class="sec-line"></span>
+          </div>
+
+          <div class="bento">
+            <div class="bento-card bento-wide reveal">
+              <h3 class="bento-heading">Frontend</h3>
+              <div class="skill-pills">
+                <span class="skill-pill">Angular</span
+                ><span class="skill-pill">Ionic</span>
+                <span class="skill-pill">TypeScript</span
+                ><span class="skill-pill">RxJS</span>
+                <span class="skill-pill">JavaScript</span
+                ><span class="skill-pill">SCSS / CSS</span>
+                <span class="skill-pill">Bootstrap</span
+                ><span class="skill-pill">Storybook</span>
+              </div>
+            </div>
+            <div class="bento-card reveal">
+              <h3 class="bento-heading">Backend</h3>
+              <div class="skill-pills">
+                <span class="skill-pill">NestJS</span
+                ><span class="skill-pill">Node.js</span>
+                <span class="skill-pill">Express</span
+                ><span class="skill-pill">API REST</span>
+                <span class="skill-pill">JWT</span
+                ><span class="skill-pill">API Gateway</span>
+                <span class="skill-pill">Middleware</span>
+              </div>
+            </div>
+            <div class="bento-card reveal">
+              <h3 class="bento-heading" data-i18n="skills.db">
+                Bases de données
+              </h3>
+              <div class="skill-pills">
+                <span class="skill-pill">MongoDB</span
+                ><span class="skill-pill">PostgreSQL</span>
+                <span class="skill-pill">MySQL</span>
+              </div>
+            </div>
+            <div class="bento-card reveal">
+              <h3 class="bento-heading">Architecture</h3>
+              <div class="skill-pills">
+                <span class="skill-pill">MVC</span
+                ><span class="skill-pill">DDD</span>
+                <span class="skill-pill">CQRS</span
+                ><span class="skill-pill">Microservices</span>
+                <span class="skill-pill" data-i18n="skills.modular"
+                  >Modulaire</span
+                >
+              </div>
+            </div>
+            <div class="bento-card reveal">
+              <h3 class="bento-heading" data-i18n="skills.methods">
+                Méthodes &amp; Outils
+              </h3>
+              <div class="skill-pills">
+                <span class="skill-pill">Agile · Scrum</span
+                ><span class="skill-pill">Git · GitHub</span>
+                <span class="skill-pill">Docker Compose</span
+                ><span class="skill-pill">Jest</span>
+                <span class="skill-pill">Postman</span
+                ><span class="skill-pill">Linux (Debian)</span>
+              </div>
+            </div>
+            <div class="bento-card reveal">
+              <h3 class="bento-heading" data-i18n="skills.design">
+                Conception
+              </h3>
+              <div class="skill-pills">
+                <span class="skill-pill">MERISE</span
+                ><span class="skill-pill">UML</span>
+                <span class="skill-pill" data-i18n="skills.needsAnalysis"
+                  >Analyse des besoins</span
+                >
+                <span class="skill-pill">User Stories</span
+                ><span class="skill-pill">Backlog</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Contact ── -->
+        <section id="contact">
+          <div class="sec-header">
+            <span class="sec-num">05</span>
+            <span class="sec-title-text" data-i18n="nav.contact">Contact</span>
+            <span class="sec-line"></span>
+          </div>
+
+          <div class="contact-wrap reveal">
+            <p class="contact-overline" data-i18n="contact.overline">
+              // what's next?
+            </p>
+            <h3 class="contact-heading" data-i18n="contact.heading">
+              Travaillons ensemble
+            </h3>
+            <p class="contact-body" data-i18n="contact.body">
+              Je suis disponible pour de nouvelles opportunités — freelance, CDI
+              ou collaboration à distance. Si vous avez un projet intéressant ou
+              souhaitez simplement échanger, n'hésitez pas.
+            </p>
+            <a
+              class="contact-btn"
+              href="mailto:harrisrandrianantenaina@gmail.com"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              <span data-i18n="contact.btn">Envoyer un message</span>
+            </a>
+          </div>
+
+          <p class="footer-credit reveal" data-i18n="contact.footer">
+            Conçu &amp; développé par Harris Martial Randrianantenaina
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // ── Theme ──
+      const html = document.documentElement;
+      const moonIco = document.getElementById("icon-moon");
+      const sunIco = document.getElementById("icon-sun");
+
+      function applyTheme(dark) {
+        html.classList.toggle("dark", dark);
+        html.classList.toggle("light", !dark);
+        moonIco.style.display = dark ? "block" : "none";
+        sunIco.style.display = dark ? "none" : "block";
+        localStorage.setItem("portfolio-theme", dark ? "dark" : "light");
+      }
+
+      applyTheme(localStorage.getItem("portfolio-theme") !== "light");
+
+      document.getElementById("theme-btn").addEventListener("click", () => {
+        applyTheme(html.classList.contains("light"));
+      });
+
+      // ── Scroll progress ──
+      const bar = document.getElementById("scroll-progress");
+      function onScroll() {
+        const d = document.documentElement;
+        bar.style.width =
+          (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100 + "%";
+        updateNav();
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      // ── Spotlight ──
+      const spot = document.getElementById("spotlight");
+      document.addEventListener("mousemove", ({ clientX: x, clientY: y }) => {
+        const dark = html.classList.contains("dark");
+        spot.style.background = `radial-gradient(500px at ${x}px ${y}px, ${dark ? "rgba(59,130,246,0.1)" : "rgba(59,130,246,0.07)"}, transparent 75%)`;
+      });
+
+      // ── Scroll reveal ──
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
+      );
+      document.querySelectorAll(".reveal").forEach((el) => obs.observe(el));
+
+      // ── Active nav ──
+      const sections = [...document.querySelectorAll("section[id]")];
+      const navLinks = [...document.querySelectorAll(".nav-item a")];
+
+      function updateNav() {
+        const atBottom =
+          window.scrollY + window.innerHeight >=
+          document.documentElement.scrollHeight - 40;
+        let cur = "";
+        if (atBottom) {
+          cur = sections[sections.length - 1].id;
+        } else {
+          sections.forEach((s) => {
+            if (window.scrollY >= s.offsetTop - 200) cur = s.id;
+          });
+        }
+        navLinks.forEach((a) =>
+          a.classList.toggle("active", a.dataset.sec === cur),
+        );
+      }
+      updateNav();
+
+      // ── Smooth links ──
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          const t = document.getElementById(a.getAttribute("href").slice(1));
+          if (t) {
+            e.preventDefault();
+            t.scrollIntoView({ behavior: "smooth" });
+          }
+        });
+      });
+
+      // ── i18n ──
+      const translations = {
+        fr: {
+          "hero.label": "// fullstack developer",
+          "hero.title": "Angular & NestJS",
+          "hero.desc":
+            "Je conçois des applications web et mobiles robustes, du frontend Angular au backend NestJS, jusqu'au déploiement en production.",
+          "nav.about": "À propos",
+          "nav.experience": "Expériences",
+          "nav.projects": "Projets",
+          "nav.skills": "Compétences",
+          "nav.contact": "Contact",
+          // About
+          "about.p1":
+            "Développeur fullstack spécialisé en <strong>Angular</strong> et <strong>NestJS</strong>, j'interviens sur l'ensemble du cycle de développement&nbsp;: analyse, conception, développement, déploiement et formation.",
+          "about.p2":
+            "J'ai livré en production un <strong>système de gestion hospitalière</strong> déployé au CHUSSPA, et je contribue actuellement au développement de <strong>Qolee</strong> — une application de gestion de bagages pour <strong>Air France</strong> (Angular, Ionic, NestJS, MongoDB Atlas).",
+          "about.p3":
+            "Je privilégie un code maintenable, une architecture propre et une UX soignée.",
+          // Exp 1
+          "exp1.period": "Août 2025<br>Présent",
+          "exp1.role": "Développeur Fullstack",
+          "exp1.location": "Nanisana, Antananarivo — CDI",
+          "exp1.b1":
+            "Conception et développement de fonctionnalités métier dans un environnement Angular/NestJS en production.",
+          "exp1.b2":
+            "Participation active aux sprints Agile (Scrum) : estimations, revues de code, rétrospectives.",
+          "exp1.b3":
+            "Standardisation des environnements via Docker Compose pour toute l'équipe.",
+          "exp1.b4":
+            'Développement de <strong style="color:var(--text-hi)">Qolee</strong>, application web et mobile de gestion de bagages pour Air France (Angular, NestJS, Ionic, MongoDB Atlas).',
+          // Exp 2
+          "exp2.period": "Jan 2025<br>Août 2025",
+          "exp2.role": "Stage — Développeur Fullstack",
+          "exp2.b1":
+            "Développement intégral du HMS déployé en production au CHUSSPA.",
+          "exp2.b2": "Architecture modulaire backend NestJS avec API Gateway.",
+          "exp2.b3":
+            "7+ modules Angular couvrant l'ensemble des services du CHUSSPA.",
+          "exp2.b4": "Sécurisation des flux avec JWT et gestion des rôles.",
+          "exp2.b5":
+            "Documentation technique et formation des utilisateurs finaux.",
+          // Exp 3
+          "exp3.period": "Avr 2024<br>Juil 2024",
+          "exp3.role": "Stage — Développeur Web & Mobile",
+          "exp3.company": "Ministère de l'Énergie",
+          "exp3.b1":
+            "Solution multi-plateforme de gestion du parc informatique ministériel.",
+          "exp3.b2":
+            "Interface web Laravel pour l'administration globale du parc.",
+          "exp3.b3":
+            "Application mobile React Native pour la consultation et le signalement d'incidents.",
+          "exp3.b4":
+            "Communication en temps réel entre interfaces web et mobile.",
+          // Projects
+          "proj1.context": "Système d'information · Production · CHUSSPA",
+          "proj1.desc":
+            "Application complète déployée en production au CHUSSPA. Couvre guichet, caisse, médecins, laboratoire, pharmacie et administration. Architecture modulaire NestJS avec API Gateway, authentification JWT et modules Angular indépendants par service.",
+          "proj2.title": "Gestion de Bagages",
+          "proj2.desc":
+            "Application de gestion de bagages pour Air France et Warning développée chez ORCHIS MG. Interface web Angular et mobile Ionic, backend NestJS avec MongoDB Atlas cloud.",
+          "proj3.context": "Multi-plateforme · Ministère de l'Énergie",
+          "proj3.title": "Gestion du Parc Informatique",
+          "proj3.desc":
+            "Solution complète de suivi du parc informatique du Ministère de l'Énergie. Interface Laravel pour les administrateurs et application React Native pour les agents terrain avec remontée d'incidents en temps réel.",
+          // Skills
+          "skills.db": "Bases de données",
+          "skills.modular": "Modulaire",
+          "skills.methods": "Méthodes & Outils",
+          "skills.design": "Conception",
+          "skills.needsAnalysis": "Analyse des besoins",
+          // Contact
+          "contact.overline": "// et ensuite ?",
+          "contact.heading": "Travaillons ensemble",
+          "contact.body":
+            "Je suis disponible pour de nouvelles opportunités — freelance, CDI ou collaboration à distance. Si vous avez un projet intéressant ou souhaitez simplement échanger, n'hésitez pas.",
+          "contact.btn": "Envoyer un message",
+          "contact.footer":
+            "Conçu & développé par Harris Martial Randrianantenaina",
+        },
+        en: {
+          "hero.label": "// fullstack developer",
+          "hero.title": "Angular & NestJS",
+          "hero.desc":
+            "I build robust web and mobile applications, from the Angular frontend to the NestJS backend, all the way to production deployment.",
+          "nav.about": "About",
+          "nav.experience": "Experiences",
+          "nav.projects": "Projects",
+          "nav.skills": "Skills",
+          "nav.contact": "Contact",
+          // About
+          "about.p1":
+            "Fullstack developer specialized in <strong>Angular</strong> and <strong>NestJS</strong>, I work across the entire development cycle: analysis, design, development, deployment, and training.",
+          "about.p2":
+            "I shipped a <strong>hospital management system</strong> to production at CHUSSPA, and I'm currently contributing to <strong>Qolee</strong> — a baggage management application for <strong>Air France</strong> (Angular, Ionic, NestJS, MongoDB Atlas).",
+          "about.p3":
+            "I value maintainable code, clean architecture, and polished UX.",
+          // Exp 1
+          "exp1.period": "Aug 2025<br>Present",
+          "exp1.role": "Fullstack Developer",
+          "exp1.location": "Nanisana, Antananarivo — Full-time",
+          "exp1.b1":
+            "Design and development of business features in a production Angular/NestJS environment.",
+          "exp1.b2":
+            "Active participation in Agile sprints (Scrum): estimations, code reviews, retrospectives.",
+          "exp1.b3":
+            "Standardized development environments with Docker Compose across the team.",
+          "exp1.b4":
+            'Development of <strong style="color:var(--text-hi)">Qolee</strong>, a web and mobile baggage management app for Air France (Angular, NestJS, Ionic, MongoDB Atlas).',
+          // Exp 2
+          "exp2.period": "Jan 2025<br>Aug 2025",
+          "exp2.role": "Internship — Fullstack Developer",
+          "exp2.b1":
+            "Full development of the HMS deployed to production at CHUSSPA.",
+          "exp2.b2":
+            "Modular backend architecture with NestJS and API Gateway.",
+          "exp2.b3": "7+ Angular modules covering all CHUSSPA services.",
+          "exp2.b4":
+            "Secured all flows with JWT authentication and role management.",
+          "exp2.b5": "Technical documentation and end-user training.",
+          // Exp 3
+          "exp3.period": "Apr 2024<br>Jul 2024",
+          "exp3.role": "Internship — Web & Mobile Developer",
+          "exp3.company": "Ministry of Energy",
+          "exp3.b1":
+            "Cross-platform solution for managing the ministry's IT equipment.",
+          "exp3.b2": "Laravel web interface for global fleet administration.",
+          "exp3.b3":
+            "React Native mobile app for field agents to consult and report incidents.",
+          "exp3.b4":
+            "Real-time communication between web and mobile interfaces.",
+          // Projects
+          "proj1.context": "Information system · Production · CHUSSPA",
+          "proj1.desc":
+            "Full application deployed to production at CHUSSPA. Covers reception, billing, doctors, laboratory, pharmacy, and administration. Modular NestJS architecture with API Gateway, JWT authentication, and independent Angular modules per service.",
+          "proj2.title": "Baggage Management",
+          "proj2.desc":
+            "Baggage management application for Air France and Warning, developed at ORCHIS MG. Angular web interface and Ionic mobile app, NestJS backend with MongoDB Atlas cloud.",
+          "proj3.context": "Cross-platform · Ministry of Energy",
+          "proj3.title": "IT Fleet Management",
+          "proj3.desc":
+            "Complete IT fleet tracking solution for the Ministry of Energy. Laravel admin interface and React Native app for field agents with real-time incident reporting.",
+          // Skills
+          "skills.db": "Databases",
+          "skills.modular": "Modular",
+          "skills.methods": "Methods & Tools",
+          "skills.design": "Design & Modeling",
+          "skills.needsAnalysis": "Requirements analysis",
+          // Contact
+          "contact.overline": "// what's next?",
+          "contact.heading": "Let's work together",
+          "contact.body":
+            "I'm open to new opportunities — freelance, full-time, or remote collaboration. Whether you have a project in mind or just want to connect, feel free to reach out.",
+          "contact.btn": "Send a message",
+          "contact.footer":
+            "Designed & built by Harris Martial Randrianantenaina",
+        },
+      };
+
+      let currentLang = localStorage.getItem("portfolio-lang") || "fr";
+      const langBtn = document.getElementById("lang-btn");
+
+      function setLang(lang) {
+        currentLang = lang;
+        localStorage.setItem("portfolio-lang", lang);
+        langBtn.textContent = lang === "fr" ? "FR" : "EN";
+        document.documentElement.lang = lang;
+
+        const t = translations[lang];
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const key = el.dataset.i18n;
+          if (t[key] !== undefined) el.textContent = t[key];
+        });
+        document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+          const key = el.dataset.i18nHtml;
+          if (t[key] !== undefined) el.innerHTML = t[key];
+        });
+      }
+
+      // Init
+      setLang(currentLang);
+
+      langBtn.addEventListener("click", () => {
+        setLang(currentLang === "fr" ? "en" : "fr");
+      });
+
+      // ── PDF download — opens cv.html in a new window and prints it ──
+      document.getElementById("pdf-btn").addEventListener("click", () => {
+        const w = window.open("cv.html", "_blank");
+        w.addEventListener("load", () => w.print());
+      });
+    </script>
+  </body>
+</html>
