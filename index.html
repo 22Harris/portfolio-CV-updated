@@ -2049,9 +2049,14 @@
 
       // ── PDF download — opens cv.html in a new window and prints it ──
       document.getElementById("pdf-btn").addEventListener("click", () => {
-        const w = window.open("cv.html", "_blank");
-        w.addEventListener("load", () => w.print());
-      });
+  const w = window.open("cv.html", "_blank");
+
+  setTimeout(() => {
+    if (w) {
+      w.print();
+    }
+  }, 1000);
+});
     </script>
   </body>
 </html>
